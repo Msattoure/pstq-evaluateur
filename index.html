@@ -5,6 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Évaluateur PSTQ - Programme de sélection des travailleurs qualifiés</title>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBT-TrkG0X-1rNM4AeN6mO4OFjscauxnYw",
+            authDomain: "pstq-simulator.firebaseapp.com",
+            projectId: "pstq-simulator",
+            storageBucket: "pstq-simulator.firebasestorage.app",
+            messagingSenderId: "317639853680",
+            appId: "1:317639853680:web:b93e4033f021ce9ef996b5",
+            measurementId: "G-434N1R5XPH"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Make analytics available globally
+        window.firebaseAnalytics = analytics;
+        window.logFirebaseEvent = logEvent;
+    </script>
     <style>
         * {
             margin: 0;
@@ -923,16 +947,40 @@
                 if (spouseQcDiploma > 0) adaptDetails.push({ label: "Diplôme QC conjoint", points: spouseQcDiploma });
             }
 
+            const totalScore = humanCapital + quebecNeeds + adaptation;
+
             // Afficher les résultats
             document.getElementById('humanCapitalScore').textContent = humanCapital;
             document.getElementById('quebecNeedsScore').textContent = quebecNeeds;
             document.getElementById('adaptationScore').textContent = adaptation;
-            document.getElementById('totalScore').textContent = humanCapital + quebecNeeds + adaptation;
+            document.getElementById('totalScore').textContent = totalScore;
 
             // Afficher les détails
             displayDetails('humanCapitalDetails', humanDetails);
             displayDetails('quebecNeedsDetails', quebecDetails);
             displayDetails('adaptationDetails', adaptDetails);
+
+            // Analytics - Log score calculation
+            if (window.firebaseAnalytics && window.logFirebaseEvent) {
+                // Log du calcul avec catégorie de score
+                let scoreCategory = 'very_low';
+                if (totalScore >= 1200) scoreCategory = 'excellent';
+                else if (totalScore >= 1000) scoreCategory = 'very_good';
+                else if (totalScore >= 800) scoreCategory = 'good';
+                else if (totalScore >= 600) scoreCategory = 'moderate';
+                else if (totalScore >= 400) scoreCategory = 'low';
+
+                window.logFirebaseEvent(window.firebaseAnalytics, 'score_calculated', {
+                    total_score: totalScore,
+                    score_category: scoreCategory,
+                    has_spouse: hasSpouse,
+                    human_capital: humanCapital,
+                    quebec_needs: quebecNeeds,
+                    adaptation: adaptation,
+                    french_level: Math.round((oralComp + oralProd + writtenComp + writtenProd) / 4),
+                    age_group: age < 25 ? '18-24' : age < 35 ? '25-34' : age < 45 ? '35-44' : '45+'
+                });
+            }
         }
 
         // Fonction pour afficher les détails des scores
@@ -955,6 +1003,13 @@
 
         // Ajouter les événements
         document.addEventListener('DOMContentLoaded', function () {
+
+            if (window.firebaseAnalytics && window.logFirebaseEvent) {
+                window.logFirebaseEvent(window.firebaseAnalytics, 'page_view', {
+                    page_title: 'PSTQ Calculator',
+                    page_location: window.location.href
+                });
+            }
             // Événements pour tous les inputs
             const inputs = document.querySelectorAll('input[type="number"], select');
             inputs.forEach(input => {
