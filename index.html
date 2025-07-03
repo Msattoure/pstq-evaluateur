@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluateur PSTQ - Programme de sélection des travailleurs qualifiés</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003f8a 0%, #005cb8 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .results-panel {
+                position: static !important;
+            }
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #003f8a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .subsection-title {
+            font-size: 1.3em;
+            color: #005cb8;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #005cb8;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .score-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .score-category {
+            margin-bottom: 15px;
+        }
+
+        .score-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            color: #003f8a;
+            font-weight: bold;
+        }
+
+        .total-score {
+            background: linear-gradient(135deg, #003f8a 0%, #005cb8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .total-score-label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .total-score-value {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .language-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #005cb8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #333;
+        }
+
+        button {
+            background: #005cb8;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #003f8a;
+        }
+
+        .separator {
+            height: 2px;
+            background: #e0e0e0;
+            margin: 30px 0;
+        }
+
+        #spouseSection {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-breakdown {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .detail-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+
+        .detail-label {
+            flex: 1;
+        }
+
+        .detail-points {
+            font-weight: 600;
+            color: #003f8a;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Évaluateur PSTQ</h1>
+            <p>Programme de sélection des travailleurs qualifiés - Calcul automatique du pointage</p>
+        </div>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2 class="section-title">Capital humain (520 points max)</h2>
+
+                <h3 class="subsection-title">Connaissance du français</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hasSpouse">
+                    <label for="hasSpouse">J'ai un époux/conjoint de fait qui m'accompagne</label>
+                </div>
+
+                <div class="language-grid">
+                    <div class="form-group">
+                        <label for="frenchOralComp">Compréhension orale (niveau 1-12)</label>
+                        <input type="number" id="frenchOralComp" min="1" max="12" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="frenchOralProd">Production orale (niveau 1-12)</label>
+                        <input type="number" id="frenchOralProd" min="1" max="12" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="frenchWrittenComp">Compréhension écrite (niveau 1-12)</label>
+                        <input type="number" id="frenchWrittenComp" min="1" max="12" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="frenchWrittenProd">Production écrite (niveau 1-12)</label>
+                        <input type="number" id="frenchWrittenProd" min="1" max="12" value="1">
+                    </div>
+                </div>
+
+                <h3 class="subsection-title">Âge</h3>
+                <div class="form-group">
+                    <label for="age">Votre âge</label>
+                    <input type="number" id="age" min="16" max="65" value="30">
+                </div>
+
+                <h3 class="subsection-title">Expérience de travail</h3>
+                <div class="form-group">
+                    <label for="workExperience">Durée de l'expérience (derniers 5 ans, en mois)</label>
+                    <input type="number" id="workExperience" min="0" max="60" value="0">
+                    <p class="help-text">Incluant stages rémunérés ou non (max 3 mois) sanctionnés par un diplôme</p>
+                </div>
+
+                <h3 class="subsection-title">Niveau de scolarité</h3>
+                <div class="form-group">
+                    <label for="education">Niveau d'études le plus élevé</label>
+                    <select id="education">
+                        <option value="0">Aucun diplôme</option>
+                        <option value="13">Secondaire général complété</option>
+                        <option value="13">Secondaire professionnel 600-899h (Québec)</option>
+                        <option value="26">Secondaire professionnel 900h+ (Québec)</option>
+                        <option value="26">Secondaire professionnel 1 an+ (hors Québec)</option>
+                        <option value="39">Postsecondaire général 2 ans</option>
+                        <option value="52">Postsecondaire technique 900h+ (Québec)</option>
+                        <option value="52">Postsecondaire technique 1-2 ans (hors Québec)</option>
+                        <option value="78">Postsecondaire technique 3 ans</option>
+                        <option value="78">Universitaire 1er cycle 1 an</option>
+                        <option value="91">Universitaire 1er cycle 2 ans</option>
+                        <option value="104">Universitaire 1er cycle 3-4 ans</option>
+                        <option value="110">Universitaire 1er cycle 5 ans+</option>
+                        <option value="110">Universitaire 2e cycle 1 an</option>
+                        <option value="117">Universitaire 2e cycle 2 ans+</option>
+                        <option value="130">Spécialisation médicale 2 ans+</option>
+                        <option value="130">Universitaire 3e cycle</option>
+                    </select>
+                </div>
+
+                <div class="separator"></div>
+
+                <h2 class="section-title">Besoins du Québec et priorités (700 points max)</h2>
+
+                <h3 class="subsection-title">Profession principale</h3>
+                <div class="form-group">
+                    <label for="professionDiag">Diagnostic de main-d'œuvre de votre profession</label>
+                    <select id="professionDiag">
+                        <option value="equilibre">En équilibre ou sans diagnostic</option>
+                        <option value="leger_deficit">En léger déficit</option>
+                        <option value="deficit">En déficit</option>
+                    </select>
+                    <p class="help-text">Consultez la liste des diagnostics de moyen terme sur le site du gouvernement
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label for="professionExp">Expérience dans cette profession (mois)</label>
+                    <input type="number" id="professionExp" min="0" max="60" value="0">
+                </div>
+
+                <h3 class="subsection-title">Diplôme du Québec</h3>
+                <div class="form-group">
+                    <label for="quebecDiploma">Diplôme obtenu au Québec</label>
+                    <select id="quebecDiploma">
+                        <option value="0">Aucun diplôme du Québec</option>
+                        <option value="20">Secondaire général complété</option>
+                        <option value="20">Secondaire professionnel DEP 600-899h</option>
+                        <option value="40">Secondaire professionnel 900h+</option>
+                        <option value="60">Postsecondaire général 2 ans</option>
+                        <option value="80">Postsecondaire technique 900h+</option>
+                        <option value="120">Postsecondaire technique 3 ans</option>
+                        <option value="120">Universitaire 1er cycle 1 an</option>
+                        <option value="140">Universitaire 1er cycle 2 ans</option>
+                        <option value="160">Universitaire 1er cycle 3-4 ans</option>
+                        <option value="170">Universitaire 1er cycle 5 ans+</option>
+                        <option value="170">Universitaire 2e cycle 1 an</option>
+                        <option value="180">Universitaire 2e cycle 2 ans+</option>
+                        <option value="200">Spécialisation médicale 2 ans+</option>
+                        <option value="200">Universitaire 3e cycle</option>
+                    </select>
+                </div>
+
+                <h3 class="subsection-title">Expérience au Québec</h3>
+                <div class="form-group">
+                    <label for="quebecWorkExp">Expérience de travail au Québec (mois)</label>
+                    <input type="number" id="quebecWorkExp" min="0" max="60" value="0">
+                </div>
+
+                <h3 class="subsection-title">Séjour hors Montréal (CMM)</h3>
+                <div class="form-group">
+                    <label for="outsideMtlResidence">Durée de résidence hors CMM (mois)</label>
+                    <input type="number" id="outsideMtlResidence" min="0" max="60" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="outsideMtlWork">Durée de travail hors CMM (mois)</label>
+                    <input type="number" id="outsideMtlWork" min="0" max="60" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="outsideMtlStudy">Durée d'études hors CMM (mois)</label>
+                    <input type="number" id="outsideMtlStudy" min="0" max="60" value="0">
+                </div>
+
+                <h3 class="subsection-title">Offre d'emploi</h3>
+                <div class="form-group">
+                    <label for="jobOffer">Offre d'emploi validée</label>
+                    <select id="jobOffer">
+                        <option value="0">Aucune offre validée</option>
+                        <option value="50">Hors de la CMM</option>
+                        <option value="30">Dans la CMM</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hasAuthorization">
+                    <label for="hasAuthorization">J'ai une autorisation d'exercer ma profession ou une reconnaissance de
+                        diplôme (50 points)</label>
+                </div>
+
+                <div class="separator"></div>
+
+                <h2 class="section-title">Facteurs d'adaptation (180 points max)</h2>
+
+                <h3 class="subsection-title">Séjour d'études au Québec (sans diplôme)</h3>
+                <div class="form-group">
+                    <label for="studyStatus">Statut du séjour d'études</label>
+                    <select id="studyStatus">
+                        <option value="none">Aucun séjour</option>
+                        <option value="completed">Terminé (sans diplôme)</option>
+                        <option value="ongoing">En cours</option>
+                    </select>
+                </div>
+                <div class="form-group" id="studyDurationGroup" style="display:none;">
+                    <label for="studyDuration">Durée du séjour (mois)</label>
+                    <input type="number" id="studyDuration" min="0" max="60" value="0">
+                </div>
+
+                <h3 class="subsection-title">Parenté au Québec</h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hasFamily">
+                    <label for="hasFamily">J'ai un membre de la parenté au Québec (hors CMM) (10 points)</label>
+                </div>
+
+                <div id="spouseSection" style="display:none;">
+                    <h3 class="subsection-title">Information sur l'époux/conjoint</h3>
+
+                    <h4 style="margin-top: 15px; margin-bottom: 10px;">Français de l'époux/conjoint</h4>
+                    <div class="language-grid">
+                        <div class="form-group">
+                            <label for="spouseFrenchOralComp">Compréhension orale</label>
+                            <input type="number" id="spouseFrenchOralComp" min="1" max="12" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="spouseFrenchOralProd">Production orale</label>
+                            <input type="number" id="spouseFrenchOralProd" min="1" max="12" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="spouseFrenchWrittenComp">Compréhension écrite</label>
+                            <input type="number" id="spouseFrenchWrittenComp" min="1" max="12" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="spouseFrenchWrittenProd">Production écrite</label>
+                            <input type="number" id="spouseFrenchWrittenProd" min="1" max="12" value="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="spouseAge">Âge de l'époux/conjoint</label>
+                        <input type="number" id="spouseAge" min="16" max="65" value="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="spouseQcExp">Expérience au Québec de l'époux/conjoint (mois)</label>
+                        <input type="number" id="spouseQcExp" min="0" max="60" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="spouseEducation">Niveau d'études de l'époux/conjoint</label>
+                        <select id="spouseEducation">
+                            <option value="0">Aucun diplôme</option>
+                            <option value="2">Secondaire général complété</option>
+                            <option value="2">Secondaire professionnel 600-899h</option>
+                            <option value="4">Secondaire professionnel 900h+</option>
+                            <option value="4">Secondaire professionnel 1 an+</option>
+                            <option value="6">Postsecondaire général 2 ans</option>
+                            <option value="8">Postsecondaire technique 900h+</option>
+                            <option value="8">Postsecondaire technique 1-2 ans</option>
+                            <option value="12">Postsecondaire technique 3 ans</option>
+                            <option value="12">Universitaire 1er cycle 1 an</option>
+                            <option value="14">Universitaire 1er cycle 2 ans</option>
+                            <option value="16">Universitaire 1er cycle 3-4 ans</option>
+                            <option value="17">Universitaire 1er cycle 5 ans+</option>
+                            <option value="17">Universitaire 2e cycle 1 an</option>
+                            <option value="18">Universitaire 2e cycle 2 ans+</option>
+                            <option value="20">Spécialisation médicale 2 ans+</option>
+                            <option value="20">Universitaire 3e cycle</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="spouseQcDiploma">Diplôme du Québec de l'époux/conjoint</label>
+                        <select id="spouseQcDiploma">
+                            <option value="0">Aucun diplôme du Québec</option>
+                            <option value="3">Secondaire général complété</option>
+                            <option value="3">Secondaire professionnel DEP 600-899h</option>
+                            <option value="6">Secondaire professionnel 900h+</option>
+                            <option value="9">Postsecondaire général 2 ans</option>
+                            <option value="12">Postsecondaire technique 900h+</option>
+                            <option value="18">Postsecondaire technique 3 ans</option>
+                            <option value="18">Universitaire 1er cycle 1 an</option>
+                            <option value="21">Universitaire 1er cycle 2 ans</option>
+                            <option value="24">Universitaire 1er cycle 3-4 ans</option>
+                            <option value="25">Universitaire 1er cycle 5 ans+</option>
+                            <option value="25">Universitaire 2e cycle 1 an</option>
+                            <option value="27">Universitaire 2e cycle 2 ans+</option>
+                            <option value="30">Spécialisation médicale 2 ans+</option>
+                            <option value="30">Universitaire 3e cycle</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="spouseFamily">
+                        <label for="spouseFamily">Le membre de la parenté est lié à mon époux/conjoint (5
+                            points)</label>
+                    </div>
+                </div>
+
+                <button onclick="calculateScore()">Calculer mon score</button>
+            </div>
+
+            <div class="results-panel">
+                <h2 class="section-title">Résultats</h2>
+
+                <div class="score-display">
+                    <div class="score-category">
+                        <div class="score-label">Capital humain</div>
+                        <div class="score-value" id="humanCapitalScore">0</div>
+                        <div class="help-text">Maximum: 520 points</div>
+                        <div class="detail-breakdown" id="humanCapitalDetails"></div>
+                    </div>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-category">
+                        <div class="score-label">Besoins du Québec</div>
+                        <div class="score-value" id="quebecNeedsScore">0</div>
+                        <div class="help-text">Maximum: 700 points</div>
+                        <div class="detail-breakdown" id="quebecNeedsDetails"></div>
+                    </div>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-category">
+                        <div class="score-label">Facteurs d'adaptation</div>
+                        <div class="score-value" id="adaptationScore">0</div>
+                        <div class="help-text">Maximum: 180 points</div>
+                        <div class="detail-breakdown" id="adaptationDetails"></div>
+                    </div>
+                </div>
+
+                <div class="total-score">
+                    <div class="total-score-label">Score total</div>
+                    <div class="total-score-value" id="totalScore">0</div>
+                    <div style="margin-top: 10px; font-size: 0.9em;">Maximum: 1 400 points</div>
+                </div>
+
+                <div class="info-box">
+                    <p><strong>Note:</strong> Ce calculateur est basé sur les critères du 2 juillet 2025. Les seuils
+                        d'invitation varient selon les tirages.</p>
+                </div>
+            </div>
+        </div>
+        <footer style="margin-top: 50px; padding: 30px 0; background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center; color: #6c757d;">
+                <p style="margin-bottom: 10px; font-size: 0.95em;">
+                    <strong>Développé par:</strong> Moussa Touré avec l'aide de l'IA
+                </p>
+                <p style="margin-bottom: 10px; font-size: 0.9em;">
+                    <a href="mailto:msattoure@gmail.com" style="color: #005cb8; text-decoration: none;">
+                        msattoure@gmail.com
+                    </a>
+                </p>
+                <p style="font-size: 0.85em; margin-top: 20px;">
+                    © 2025 - Outil d'évaluation PSTQ Québec
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+
+        // Tableaux de pointage pour le français
+        const frenchScores = {
+            single: {
+                oral: {
+                    1: 0, 2: 0, 3: 0, 4: 0,
+                    5: 38, 6: 38,
+                    7: 44, 8: 44,
+                    9: 50, 10: 50, 11: 50, 12: 50
+                },
+                written: {
+                    1: 0, 2: 0, 3: 0, 4: 0,
+                    5: 38, 6: 38,
+                    7: 44, 8: 44,
+                    9: 50, 10: 50, 11: 50, 12: 50
+                }
+            },
+            withSpouse: {
+                oral: {
+                    1: 0, 2: 0, 3: 0, 4: 0,
+                    5: 30, 6: 30,
+                    7: 35, 8: 35,
+                    9: 40, 10: 40, 11: 40, 12: 40
+                },
+                written: {
+                    1: 0, 2: 0, 3: 0, 4: 0,
+                    5: 30, 6: 30,
+                    7: 35, 8: 35,
+                    9: 40, 10: 40, 11: 40, 12: 40
+                }
+            }
+        };
+
+        // Tableaux de pointage pour l'âge
+        const ageScores = {
+            single: {
+                18: 110, 19: 110,
+                20: 120, 21: 120, 22: 120, 23: 120, 24: 120, 25: 120, 26: 120, 27: 120, 28: 120, 29: 120, 30: 120,
+                31: 110, 32: 100, 33: 90, 34: 80, 35: 75, 36: 70, 37: 65, 38: 60, 39: 55, 40: 50,
+                41: 40, 42: 30, 43: 20, 44: 10
+            },
+            withSpouse: {
+                18: 90, 19: 90,
+                20: 100, 21: 100, 22: 100, 23: 100, 24: 100, 25: 100, 26: 100, 27: 100, 28: 100, 29: 100, 30: 100,
+                31: 95, 32: 90, 33: 81, 34: 72, 35: 68, 36: 63, 37: 59, 38: 54, 39: 50, 40: 45,
+                41: 36, 42: 27, 43: 18, 44: 9
+            }
+        };
+
+        // Tableaux pour l'expérience
+        const experienceScores = {
+            single: {
+                0: 0, 12: 20, 24: 40, 36: 50, 48: 70
+            },
+            withSpouse: {
+                0: 0, 12: 15, 24: 30, 36: 35, 48: 50
+            }
+        };
+
+        // Tableaux pour le français du conjoint
+        const spouseFrenchScores = {
+            1: 0, 2: 0, 3: 0, 4: 4,
+            5: 6, 6: 6,
+            7: 8, 8: 8,
+            9: 10, 10: 10, 11: 10, 12: 10
+        };
+
+        // Tableaux pour l'âge du conjoint
+        const spouseAgeScores = {
+            16: 18, 17: 18, 18: 18, 19: 18,
+            20: 20, 21: 20, 22: 20, 23: 20, 24: 20, 25: 20, 26: 20, 27: 20, 28: 20, 29: 20, 30: 20,
+            31: 18, 32: 17, 33: 16, 34: 15, 35: 14, 36: 12, 37: 10, 38: 8, 39: 7, 40: 6,
+            41: 5, 42: 4, 43: 3, 44: 2
+        };
+
+        // Fonction pour calculer le score d'expérience
+        function getExperienceScore(months, hasSpouse) {
+            const scores = hasSpouse ? experienceScores.withSpouse : experienceScores.single;
+            if (months < 12) return 0;
+            if (months < 24) return scores[12];
+            if (months < 36) return scores[24];
+            if (months < 48) return scores[36];
+            return scores[48];
+        }
+
+        // Fonction pour calculer le score de profession
+        function getProfessionScore(diagnostic, months) {
+            if (months < 12) return 0;
+
+            const scores = {
+                'equilibre': { 12: 5, 24: 10, 36: 15, 48: 25 },
+                'leger_deficit': { 12: 70, 24: 80, 36: 90, 48: 100 },
+                'deficit': { 12: 90, 24: 100, 36: 110, 48: 120 }
+            };
+
+            const diagScores = scores[diagnostic];
+            if (months < 24) return diagScores[12];
+            if (months < 36) return diagScores[24];
+            if (months < 48) return diagScores[36];
+            return diagScores[48];
+        }
+
+        // Fonction pour calculer le score d'expérience au Québec
+        function getQuebecExperienceScore(months) {
+            if (months < 12) return 0;
+            if (months < 24) return 40;
+            if (months < 36) return 80;
+            if (months < 48) return 120;
+            return 160;
+        }
+
+        // Fonctions pour les séjours hors CMM
+        function getOutsideMtlResidenceScore(months) {
+            if (months < 6) return 0;
+            if (months < 12) return 6;
+            if (months < 24) return 16;
+            if (months < 36) return 24;
+            if (months < 48) return 32;
+            return 40;
+        }
+
+        function getOutsideMtlWorkScore(months) {
+            if (months < 6) return 0;
+            if (months < 12) return 9;
+            if (months < 24) return 24;
+            if (months < 36) return 36;
+            if (months < 48) return 48;
+            return 60;
+        }
+
+        function getOutsideMtlStudyScore(months) {
+            if (months < 6) return 0;
+            if (months < 12) return 3;
+            if (months < 24) return 8;
+            if (months < 36) return 12;
+            if (months < 48) return 16;
+            return 20;
+        }
+
+        // Fonction pour le séjour d'études
+        function getStudyScore(status, months) {
+            if (status === 'none') return 0;
+
+            const scores = {
+                'completed': { 0: 0, 6: 1, 12: 3, 24: 5, 36: 8, 48: 10 },
+                'ongoing': { 0: 0, 6: 5, 12: 12, 24: 18, 36: 24, 48: 30 }
+            };
+
+            const statusScores = scores[status];
+            if (months < 6) return 0;
+            if (months < 12) return statusScores[6];
+            if (months < 24) return statusScores[12];
+            if (months < 36) return statusScores[24];
+            if (months < 48) return statusScores[36];
+            return statusScores[48];
+        }
+
+        // Fonction pour l'expérience du conjoint au Québec
+        function getSpouseQcExperienceScore(months) {
+            if (months < 6) return 0;
+            if (months < 12) return 5;
+            if (months < 24) return 10;
+            if (months < 36) return 15;
+            if (months < 48) return 23;
+            return 30;
+        }
+
+        // Fonction pour mettre à jour l'interface selon le choix du conjoint
+        function updateForm() {
+            const hasSpouse = document.getElementById('hasSpouse').checked;
+            const spouseSection = document.getElementById('spouseSection');
+            spouseSection.style.display = hasSpouse ? 'block' : 'none';
+            calculateScore();
+        }
+
+        // Fonction pour gérer l'affichage du séjour d'études
+        function updateStudyDuration() {
+            const studyStatus = document.getElementById('studyStatus').value;
+            const studyDurationGroup = document.getElementById('studyDurationGroup');
+            studyDurationGroup.style.display = studyStatus !== 'none' ? 'block' : 'none';
+            calculateScore();
+        }
+
+        // Fonction principale de calcul du score
+        function calculateScore() {
+            const hasSpouse = document.getElementById('hasSpouse').checked;
+
+            // Capital humain
+            let humanCapital = 0;
+            let humanDetails = [];
+
+            // Français
+            const frenchCategory = hasSpouse ? frenchScores.withSpouse : frenchScores.single;
+            const oralComp = parseInt(document.getElementById('frenchOralComp').value);
+            const oralProd = parseInt(document.getElementById('frenchOralProd').value);
+            const writtenComp = parseInt(document.getElementById('frenchWrittenComp').value);
+            const writtenProd = parseInt(document.getElementById('frenchWrittenProd').value);
+
+            const frenchOralCompScore = frenchCategory.oral[oralComp] || 0;
+            const frenchOralProdScore = frenchCategory.oral[oralProd] || 0;
+            const frenchWrittenCompScore = frenchCategory.written[writtenComp] || 0;
+            const frenchWrittenProdScore = frenchCategory.written[writtenProd] || 0;
+
+            const frenchTotal = frenchOralCompScore + frenchOralProdScore + frenchWrittenCompScore + frenchWrittenProdScore;
+            humanCapital += frenchTotal;
+            if (frenchTotal > 0) humanDetails.push({ label: "Français", points: frenchTotal });
+
+            // Âge
+            const age = parseInt(document.getElementById('age').value);
+            const ageCategory = hasSpouse ? ageScores.withSpouse : ageScores.single;
+            const ageScore = age >= 45 ? 0 : (ageCategory[age] || 0);
+            humanCapital += ageScore;
+            if (ageScore > 0) humanDetails.push({ label: "Âge", points: ageScore });
+
+            // Expérience
+            const workExp = parseInt(document.getElementById('workExperience').value);
+            const expScore = getExperienceScore(workExp, hasSpouse);
+            humanCapital += expScore;
+            if (expScore > 0) humanDetails.push({ label: "Expérience", points: expScore });
+
+            // Éducation
+            const education = parseInt(document.getElementById('education').value);
+            let educationScore = education;
+            if (hasSpouse) {
+                // Ajuster les scores d'éducation pour le conjoint
+                const educationMap = {
+                    13: 11, 26: 22, 39: 33, 52: 44, 78: 66, 91: 77, 104: 88, 110: 93, 117: 99, 130: 110
+                };
+                educationScore = educationMap[education] || 0;
+            }
+            humanCapital += educationScore;
+            if (educationScore > 0) humanDetails.push({ label: "Scolarité", points: educationScore });
+
+            // Besoins du Québec
+            let quebecNeeds = 0;
+            let quebecDetails = [];
+
+            // Profession
+            const professionDiag = document.getElementById('professionDiag').value;
+            const professionExp = parseInt(document.getElementById('professionExp').value);
+            const profScore = getProfessionScore(professionDiag, professionExp);
+            quebecNeeds += profScore;
+            if (profScore > 0) quebecDetails.push({ label: "Profession", points: profScore });
+
+            // Diplôme du Québec
+            const quebecDiploma = parseInt(document.getElementById('quebecDiploma').value);
+            quebecNeeds += quebecDiploma;
+            if (quebecDiploma > 0) quebecDetails.push({ label: "Diplôme Québec", points: quebecDiploma });
+
+            // Expérience au Québec
+            const quebecWorkExp = parseInt(document.getElementById('quebecWorkExp').value);
+            const qcExpScore = getQuebecExperienceScore(quebecWorkExp);
+            quebecNeeds += qcExpScore;
+            if (qcExpScore > 0) quebecDetails.push({ label: "Expérience QC", points: qcExpScore });
+
+            // Séjour hors CMM
+            const outsideMtlRes = parseInt(document.getElementById('outsideMtlResidence').value);
+            const outsideMtlWork = parseInt(document.getElementById('outsideMtlWork').value);
+            const outsideMtlStudy = parseInt(document.getElementById('outsideMtlStudy').value);
+
+            const resScore = getOutsideMtlResidenceScore(outsideMtlRes);
+            const workScore = getOutsideMtlWorkScore(outsideMtlWork);
+            const studyScore = getOutsideMtlStudyScore(outsideMtlStudy);
+
+            const cmmTotal = resScore + workScore + studyScore;
+            quebecNeeds += cmmTotal;
+            if (cmmTotal > 0) quebecDetails.push({ label: "Hors CMM", points: cmmTotal });
+
+            // Offre d'emploi
+            const jobOffer = parseInt(document.getElementById('jobOffer').value);
+            quebecNeeds += jobOffer;
+            if (jobOffer > 0) quebecDetails.push({ label: "Offre emploi", points: jobOffer });
+
+            // Autorisation
+            const hasAuth = document.getElementById('hasAuthorization').checked;
+            if (hasAuth) {
+                quebecNeeds += 50;
+                quebecDetails.push({ label: "Autorisation", points: 50 });
+            }
+
+            // Facteurs d'adaptation
+            let adaptation = 0;
+            let adaptDetails = [];
+
+            // Séjour d'études
+            const studyStatus = document.getElementById('studyStatus').value;
+            const studyDuration = parseInt(document.getElementById('studyDuration').value) || 0;
+            const studySejourScore = getStudyScore(studyStatus, studyDuration);
+            adaptation += studySejourScore;
+            if (studySejourScore > 0) adaptDetails.push({ label: "Séjour études", points: studySejourScore });
+
+            // Parenté
+            const hasFamily = document.getElementById('hasFamily').checked;
+            const spouseFamily = document.getElementById('spouseFamily').checked;
+            let familyScore = 0;
+            if (hasFamily && !spouseFamily) familyScore = 10;
+            else if (spouseFamily && hasSpouse) familyScore = 5;
+            adaptation += familyScore;
+            if (familyScore > 0) adaptDetails.push({ label: "Parenté", points: familyScore });
+
+            // Conjoint
+            if (hasSpouse) {
+                // Français du conjoint
+                const spouseOralComp = parseInt(document.getElementById('spouseFrenchOralComp').value);
+                const spouseOralProd = parseInt(document.getElementById('spouseFrenchOralProd').value);
+                const spouseWrittenComp = parseInt(document.getElementById('spouseFrenchWrittenComp').value);
+                const spouseWrittenProd = parseInt(document.getElementById('spouseFrenchWrittenProd').value);
+
+                const spouseFrenchTotal = (spouseFrenchScores[spouseOralComp] || 0) +
+                    (spouseFrenchScores[spouseOralProd] || 0) +
+                    (spouseFrenchScores[spouseWrittenComp] || 0) +
+                    (spouseFrenchScores[spouseWrittenProd] || 0);
+                adaptation += spouseFrenchTotal;
+                if (spouseFrenchTotal > 0) adaptDetails.push({ label: "Français conjoint", points: spouseFrenchTotal });
+
+                // Âge du conjoint
+                const spouseAge = parseInt(document.getElementById('spouseAge').value);
+                const spouseAgeScore = spouseAge >= 45 ? 0 : (spouseAgeScores[spouseAge] || 0);
+                adaptation += spouseAgeScore;
+                if (spouseAgeScore > 0) adaptDetails.push({ label: "Âge conjoint", points: spouseAgeScore });
+
+                // Expérience QC du conjoint
+                const spouseQcExp = parseInt(document.getElementById('spouseQcExp').value);
+                const spouseQcExpScore = getSpouseQcExperienceScore(spouseQcExp);
+                adaptation += spouseQcExpScore;
+                if (spouseQcExpScore > 0) adaptDetails.push({ label: "Exp. QC conjoint", points: spouseQcExpScore });
+
+                // Éducation du conjoint
+                const spouseEducation = parseInt(document.getElementById('spouseEducation').value);
+                adaptation += spouseEducation;
+                if (spouseEducation > 0) adaptDetails.push({ label: "Scolarité conjoint", points: spouseEducation });
+
+                // Diplôme QC du conjoint
+                const spouseQcDiploma = parseInt(document.getElementById('spouseQcDiploma').value);
+                adaptation += spouseQcDiploma;
+                if (spouseQcDiploma > 0) adaptDetails.push({ label: "Diplôme QC conjoint", points: spouseQcDiploma });
+            }
+
+            // Afficher les résultats
+            document.getElementById('humanCapitalScore').textContent = humanCapital;
+            document.getElementById('quebecNeedsScore').textContent = quebecNeeds;
+            document.getElementById('adaptationScore').textContent = adaptation;
+            document.getElementById('totalScore').textContent = humanCapital + quebecNeeds + adaptation;
+
+            // Afficher les détails
+            displayDetails('humanCapitalDetails', humanDetails);
+            displayDetails('quebecNeedsDetails', quebecDetails);
+            displayDetails('adaptationDetails', adaptDetails);
+        }
+
+        // Fonction pour afficher les détails des scores
+        function displayDetails(elementId, details) {
+            const element = document.getElementById(elementId);
+            if (details.length === 0) {
+                element.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            details.forEach(detail => {
+                html += `<div class="detail-line">
+            <span class="detail-label">${detail.label}</span>
+            <span class="detail-points">${detail.points} pts</span>
+        </div>`;
+            });
+            element.innerHTML = html;
+        }
+
+        // Ajouter les événements
+        document.addEventListener('DOMContentLoaded', function () {
+            // Événements pour tous les inputs
+            const inputs = document.querySelectorAll('input[type="number"], select');
+            inputs.forEach(input => {
+                input.addEventListener('change', calculateScore);
+            });
+
+            // Événements pour les checkboxes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', calculateScore);
+            });
+
+            // Événements spéciaux
+            document.getElementById('hasSpouse').addEventListener('change', updateForm);
+            document.getElementById('studyStatus').addEventListener('change', updateStudyDuration);
+
+            // Calcul initial
+            calculateScore();
+        });
+
+    </script>
+</body>
+
+</html>
