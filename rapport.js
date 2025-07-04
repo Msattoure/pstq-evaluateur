@@ -369,7 +369,7 @@ function generateReport() {
     <div class="footer">
         <p>Rapport généré par l'Évaluateur PSTQ - https://pstq-score-similator.vercel.app/</p>
         <p>Ce rapport est basé sur les critères du 2 juillet 2025. Les seuils d'invitation varient selon les tirages.</p>
-        <p>© 2025 - Développé par un membre du groupe</p>
+        <p>© 2025 - Développé par Moussa Touré</p>
     </div>
 </body>
 </html>
