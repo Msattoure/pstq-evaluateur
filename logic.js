@@ -181,6 +181,106 @@
             calculateScore();
         }
 
+        async function saveScoreWithName() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                alert('⚠️ Veuillez entrer votre pseudonyme !');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            const score = parseInt(document.getElementById('totalScore').textContent);
+            
+            if (score === 0) {
+                alert('⚠️ Impossible d\'enregistrer un score de 0. Veuillez d\'abord remplir les informations du formulaire pour calculer votre score !');
+                return;
+            }
+            const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzGGuIrLynv8IRWiVxGTLj-SOrYsnXVEgDeVWYFUoN9SqTZmRFjps30XQLsTwKChbAD/exec';
+            
+            // Afficher un loader sur le bouton
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = 'Patientez, chargement ...';
+            button.disabled = true;
+            
+            try {
+                // Obtenir l'IP
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+                
+                // Sauvegarder
+                await fetch(SHEET_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify({
+                        score: score,
+                        username: username,
+                        ip: userIP
+                    })
+                });
+                
+                // Récupérer et afficher les vraies statistiques depuis Google Sheets
+                await displayAverage(score);
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la sauvegarde.');
+            } finally {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        async function displayAverage(userScore) {
+            try {
+                // Récupérer les données depuis votre API Google Sheets
+                const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzGGuIrLynv8IRWiVxGTLj-SOrYsnXVEgDeVWYFUoN9SqTZmRFjps30XQLsTwKChbAD/exec';
+                const response = await fetch(SHEET_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données');
+                }
+                
+                const data = await response.json();
+                const averageScore = data.averageScore;
+                const totalParticipants = data.totalParticipants;
+                
+                // Afficher la zone de résultat
+                document.getElementById('averageResult').style.display = 'block';
+                document.getElementById('averageScore').textContent = averageScore;
+                document.getElementById('totalParticipants').style.display = 'none';
+                
+                // Comparaison
+                const comparison = document.getElementById('comparison');
+                const difference = userScore - averageScore;
+                
+                if (difference > 0) {
+                    comparison.innerHTML = `✅ Votre score est <span style="color: #28a745;">${difference} points au-dessus</span> de la moyenne !`;
+                } else if (difference < 0) {
+                    comparison.innerHTML = `📊 Votre score est <span style="color: #dc3545;">${Math.abs(difference)} points en dessous</span> de la moyenne.`;
+                } else {
+                    comparison.innerHTML = `📊 Votre score est exactement dans la moyenne !`;
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors de la récupération des statistiques:', error);
+                // En cas d'erreur, afficher un message d'erreur
+                document.getElementById('averageResult').style.display = 'block';
+                document.getElementById('averageScore').textContent = 'Erreur';
+                document.getElementById('totalParticipants').style.display = 'none';
+                document.getElementById('comparison').innerHTML = '⚠️ Impossible de récupérer les statistiques pour le moment.';
+            }
+        }
+        
+
         // Fonction principale de calcul du score
         function calculateScore() {
             const hasSpouse = document.getElementById('hasSpouse').checked;

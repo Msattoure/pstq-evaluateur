@@ -284,6 +284,22 @@
             font-weight: 600;
             color: #003f8a;
         }
+
+        #averageResult {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -586,9 +602,45 @@
                     <div style="margin-top: 10px; font-size: 0.9em;">Maximum: 1 400 points</div>
                 </div>
 
+                <!-- Section améliorée pour sauvegarder -->
+                <div style="margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="color: #005cb8; margin-bottom: 15px; font-size: 1.1em;">📊 Comparez votre score</h3>
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" id="username" placeholder="Votre pseudonyme" required
+                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box;">
+                        <div style="margin-top: 5px; font-size: 0.85em; color: #666; font-style: italic;">
+                            💡 Utilisez toujours le même pseudonyme lorsque vous calculez votre score
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button onclick="saveScoreWithName()"
+                            style="background: #28a745; padding: 12px 20px; white-space: nowrap; border: none; border-radius: 5px; color: white; font-size: 16px; cursor: pointer;">
+                            Voir la moyenne 📈
+                        </button>
+                    </div>
+
+                    <!-- Zone pour afficher le résultat -->
+                    <div id="averageResult"
+                        style="display: none; margin-top: 15px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
+                        <div style="text-align: center;">
+                            <p style="margin: 0; color: #666;">Score moyen de tous les participants :</p>
+                            <div style="font-size: 2em; color: #003f8a; font-weight: bold; margin: 10px 0;"
+                                id="averageScore">0</div>
+                            <p style="margin: 0; font-size: 0.9em; color: #666;" id="totalParticipants">0 participants
+                            </p>
+                            <p style="margin-top: 10px; font-weight: 600;" id="comparison"></p>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="info-box">
                     <p><strong>Note:</strong> Ce calculateur est basé sur les critères du 2 juillet 2025. Les seuils
                         d'invitation varient selon les tirages.</p>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #dc3545;"><strong>⚠️ Clause de
+                            non-responsabilité :</strong> Cet outil est fourni à titre indicatif uniquement. Les
+                        résultats obtenus ne constituent pas une garantie d'invitation ou d'acceptation dans le
+                        programme PSTQ.</p>
                 </div>
             </div>
         </div>
