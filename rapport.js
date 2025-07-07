@@ -1,6 +1,14 @@
 // rapport.js - Système de génération de rapport PDF pour PSTQ
 
 function generateReport() {
+
+    const score = parseInt(document.getElementById('totalScore').textContent);
+            
+    if (score === 0) {
+        alert('⚠️ Impossible d\'enregistrer un score de 0. Veuillez d\'abord remplir les informations du formulaire pour calculer votre score !');
+        return;
+    }
+    
     // Récupérer toutes les données
     const hasSpouse = document.getElementById('hasSpouse').checked;
     const totalScore = parseInt(document.getElementById('totalScore').textContent);
